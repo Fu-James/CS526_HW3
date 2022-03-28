@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src= "https://d3js.org/d3-color.v1.min.js"></script> 
+<script src= "https://d3js.org/d3-interpolate.v1.min.js"></script> 
+<script src= "https://d3js.org/d3-scale-chromatic.v1.min.js"></script>  
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<!-- Create a div where the graph will take place -->
+<div id="scatter"></div>
+
+<script>
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 30, bottom: 30, left: 60},
+        width = 1600 - margin.left - margin.right,
+        height = 800 - margin.top - margin.bottom;
+    
+    // append the svg object to the body of the page
+    var svg = d3.select("#scatter")
+      .append("svg:svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .call(d3.zoom().on("zoom", function () {
+       svg.attr("transform", d3.event.transform);
+    }))
+
+    var tooltip = d3.select("body")
+      .append("div")
+      .attr("data-html", "true")
+      .style("position", "absolute")
+      .style("z-index", "10")
+      .style("visibility", "hidden")
+      .text("a simple tooltip");
+
+    var myColor = d3.scaleSequential().domain([1,14])
+      .interpolator(d3.interpolateTurbo);
+
+    const sizeScale = d3.scaleSqrt()
+      .range([0, 2]);
+
+    //Read the data
+    d3.csv("https://raw.githubusercontent.com/Fu-James/CS526_HW3/main/cit-Patents_10_32_1772975.csv", function(data) {
+      // Add X axis
+      var x = d3.range([ 0, width ]);
+      svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+    
+      svg.append("text")
+        .attr("class", "x label")
+        .attr("text-anchor", "end")
+        .attr("x", width)
+        .attr("y", height - 6)
+        .text("x");
+    
+      // Add Y axis
+      var y = d3.range([ height, 0]);
+      svg.append("g")
+        .call(d3.axisLeft(y));
+
+      svg.append("text")
+        .attr("class", "y label")
+        .attr("text-anchor", "end")
+        .attr("y", 6)
+        .attr("dy", ".75em")
+        .attr("transform", "rotate(-90)")
+        .text("y");
+    
+      // Add dots
+      svg.append('g')
+        .selectAll("circle")
+        .data(data)
+        .enter()
+        .append("svg:circle")
+        .on("mouseover", function(d){tooltip.html('x: ' + d.x +
+                                                  '<br>y: ' + d.y)
+        .on("mousemove", function(){return tooltip.style("top",
+          (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+        .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+        })
+    })
+    </script>
